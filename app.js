@@ -28,7 +28,7 @@ connection.queryAsync('show databases')
 	.then(dbs => {
 
     dbs.forEach(db => {
-      if (db.Database !== 'information_schema' && db.Database !== 'book-images') {
+      if (ignore.indexOf(db.Database) === -1) {
         allDatabases.push(db.Database);
 
         actions.push(  
