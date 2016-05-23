@@ -1,6 +1,6 @@
 'use strict';
 
-require('dotenv').config();
+require('dotenv').config({path: '/home/acps/mysql-backup/.env'});
 
 var Promise = require('bluebird');
 var spawn = require('child_process').spawn;
@@ -11,6 +11,7 @@ var connection = mysql.createConnection({
 	password: process.env.DB_PASS
 });
 var fs = require('fs');
+var backupDir = '/home/acps/mysql-backup/backups/';
 
 
 var allDatabases = [];
@@ -33,7 +34,7 @@ connection.queryAsync('show databases')
 
         actions.push(  
           new Promise(function(resolve, reject) {
-            let wstream = fs.createWriteStream(db.Database + '.sql');            
+            let wstream = fs.createWriteStream(backupDir + db.Database + '.sql');            
             let mysqldump = spawn('mysqldump', [          
               '-u', 
               process.env.DB_USER,
@@ -55,7 +56,7 @@ connection.queryAsync('show databases')
     return Promise.all(actions)
   })
   .then(() => {
-    var files = allDatabases.map((db) => db += '.sql');
+    var files = allDatabases.map((db) => backupDir + db + '.sql');
 
     files.unshift('-f');
 
