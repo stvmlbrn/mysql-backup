@@ -4,6 +4,7 @@ require('dotenv').config({path: '/home/acps/mysql-backup/.env'});
 
 var Promise = require('bluebird');
 var spawn = require('child_process').spawn;
+var path = require('path');
 var mysql = require('mysql');
 var connection = mysql.createConnection({
 	host: process.env.DB_HOST,
@@ -11,8 +12,7 @@ var connection = mysql.createConnection({
 	password: process.env.DB_PASS
 });
 var fs = require('fs');
-var backupDir = '/home/acps/mysql-backup/backups/';
-
+var backupDir = path.join(path.resolve(), 'backups/');
 
 var allDatabases = [];
 var actions = [];
