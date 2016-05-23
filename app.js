@@ -57,6 +57,8 @@ connection.queryAsync('show databases')
   .then(() => {
     var files = allDatabases.map((db) => db += '.sql');
 
+    files.unshift('-f');
+
     return new Promise(function(resolve, reject) {
       let gzip = spawn('gzip', files);
 
