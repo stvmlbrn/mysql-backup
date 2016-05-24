@@ -12,7 +12,17 @@ var connection = mysql.createConnection({
 	password: process.env.DB_PASS
 });
 var fs = require('fs');
+var s3 = require('s3');
+var s3Client = s3.createClient({
+  s3Options: {
+    accessKeyId: process.env.S3_ACCESS_KEY,
+    secretAccessKey: process.env.S3_SECRET_KEY
+  }
+});
 var backupDir = '/home/acps/mysql-backup/backups/';
+
+var moment = require('moment');
+var backupDate = moment().format('M-D-YY');
 
 var allDatabases = [];
 var actions = [];
@@ -20,6 +30,8 @@ var ignore = [
   'information_schema',
   'book-images'
 ];
+
+
 
 connection.connect();
 
@@ -66,6 +78,30 @@ connection.queryAsync('show databases')
       gzip.on('close', () => resolve());
       gzip.stderr.on('data', (data) => reject(data));
     });
+  })
+  .then(() => {
+    actions = [];
+
+    allDatabases.forEach(db => {
+      actions.push(
+        new Promise(function(resolve, reject) {
+          var params = {
+            localFile: backupDir + db +'.sql.gz',
+            s3Params: {
+              Bucket: process.env.S3_BUCKET,
+              Key: backupDate + '/' + db + '.sql.gz'
+            }
+          };
+          var uploader = s3Client.uploadFile(params);
+
+          uploader.on('end', () => resolve());
+          uploader.on('error', (err) => reject(err));
+        })
+      );
+    });
+  })
+  .then(() => {
+    return Promise.all(actions);
   })
 	.then(() => process.exit())
   .catch(err => {
