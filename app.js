@@ -12,7 +12,7 @@ var connection = mysql.createConnection({
 	password: process.env.DB_PASS
 });
 var fs = require('fs');
-var backupDir = path.join(path.resolve(), 'backups/');
+var backupDir = '/home/acps/mysql-backup/backups/';
 
 var allDatabases = [];
 var actions = [];
