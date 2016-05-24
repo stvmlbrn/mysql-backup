@@ -89,7 +89,9 @@ connection.queryAsync('show databases')
             localFile: backupDir + db +'.sql.gz',
             s3Params: {
               Bucket: process.env.S3_BUCKET,
-              Key: backupDate + '/' + db + '.sql.gz'
+              Key: backupDate + '/' + db + '.sql.gz',
+              ServerSideEncryption: 'AES256',
+              StorageClass: 'STANDARD_IA'
             }
           };
           var uploader = s3Client.uploadFile(params);
