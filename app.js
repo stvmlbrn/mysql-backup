@@ -63,10 +63,9 @@ connection.queryAsync('show databases')
         );
       }
     });
+
+    return Promise.all(actions);
 	})
-  .then(() => {
-    return Promise.all(actions)
-  })
   .then(() => {
     var files = allDatabases.map((db) => backupDir + db + '.sql');
 
@@ -101,9 +100,8 @@ connection.queryAsync('show databases')
         })
       );
     });
-  })
-  .then(() => {
-    return Promise.all(actions);
+
+     return Promise.all(actions);
   })
 	.then(() => process.exit())
   .catch(err => {
