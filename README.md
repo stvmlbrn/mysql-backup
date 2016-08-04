@@ -1,5 +1,5 @@
 #MySQL Backup
-A handy Node.js script to backup MySQL databases to Amazon S3.
+A handy Node.js script to backup MySQL databases to Amazon S3. Note - this script is intended to be run on the db server.
 
 ##Getting Started
 * Clone this repo: `git clone https://github.com/stevemilburn/mysql-backup.git && cd mysql-backup`
