@@ -19,6 +19,7 @@ var s3Client = s3.createClient({
     secretAccessKey: process.env.S3_SECRET_KEY
   }
 });
+var rp = require('request-promise');
 var backupDir = '/home/acps/mysql-backup/backups/';
 
 var moment = require('moment');
@@ -37,9 +38,11 @@ connection.connect();
 
 Promise.promisifyAll(connection);
 
-connection.queryAsync('show databases')
+rp(`http://api.cronalarm.com/v2/${process.env.CRONALARM_KEY}/start`)
+  .then(() => {
+    return connection.queryAsync('show databases');
+  })
 	.then(dbs => {
-
     dbs.forEach(db => {
       if (ignore.indexOf(db.Database) === -1) {
         allDatabases.push(db.Database);
@@ -103,7 +106,10 @@ connection.queryAsync('show databases')
 
      return Promise.all(actions);
   })
-	.then(() => process.exit())
+	.then(() => {
+    return rp(`http://api.cronalarm.com/v2/${process.env.CRONALARM_KEY}/end`);
+  })
+  .then(() => process.exit())
   .catch(err => {
     console.log(err);
     process.exit();
