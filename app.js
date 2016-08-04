@@ -20,7 +20,6 @@ var s3Client = s3.createClient({
   }
 });
 var rp = require('request-promise');
-var backupDir = '/home/acps/mysql-backup/backups/';
 
 var moment = require('moment');
 var backupDate = moment().format('M-D-YY');
@@ -49,7 +48,7 @@ rp(`http://api.cronalarm.com/v2/${process.env.CRONALARM_KEY}/start`)
 
         actions.push(  
           new Promise(function(resolve, reject) {
-            let wstream = fs.createWriteStream(backupDir + db.Database + '.sql');            
+            let wstream = fs.createWriteStream(process.env.BACKUP_PATH + db.Database + '.sql');            
             let mysqldump = spawn('mysqldump', [          
               '-u', 
               process.env.DB_USER,
@@ -70,7 +69,7 @@ rp(`http://api.cronalarm.com/v2/${process.env.CRONALARM_KEY}/start`)
     return Promise.all(actions);
 	})
   .then(() => {
-    var files = allDatabases.map((db) => backupDir + db + '.sql');
+    var files = allDatabases.map((db) => process.env.BACKUP_PATH + db + '.sql');
 
     files.unshift('-f');
 
@@ -88,7 +87,7 @@ rp(`http://api.cronalarm.com/v2/${process.env.CRONALARM_KEY}/start`)
       actions.push(
         new Promise(function(resolve, reject) {
           var params = {
-            localFile: backupDir + db +'.sql.gz',
+            localFile: process.env.BACKUP_PATH + db +'.sql.gz',
             s3Params: {
               Bucket: process.env.S3_BUCKET,
               Key: backupDate + '/' + db + '.sql.gz',
