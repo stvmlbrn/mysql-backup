@@ -26,12 +26,12 @@ var backupDate = moment().format('M-D-YY');
 
 var allDatabases = [];
 var actions = [];
+
+//Add any databases that do not need backed up in the 'ignore' array.
 var ignore = [
   'information_schema',
   'book-images'
 ];
-
-
 
 connection.connect();
 
@@ -46,6 +46,8 @@ rp(`http://api.cronalarm.com/v2/${process.env.CRONALARM_KEY}/start`)
       if (ignore.indexOf(db.Database) === -1) {
         allDatabases.push(db.Database);
 
+        //Create an array of promises that will spawn the mysqldump child process
+        //and create the individual backup files.
         actions.push(  
           new Promise(function(resolve, reject) {
             let wstream = fs.createWriteStream(process.env.BACKUP_PATH + db.Database + '.sql');            
@@ -66,9 +68,10 @@ rp(`http://api.cronalarm.com/v2/${process.env.CRONALARM_KEY}/start`)
       }
     });
 
-    return Promise.all(actions);
+    return Promise.all(actions); //execute the backups
 	})
   .then(() => {
+    //gzip each backup file.
     var files = allDatabases.map((db) => process.env.BACKUP_PATH + db + '.sql');
 
     files.unshift('-f');
@@ -83,6 +86,7 @@ rp(`http://api.cronalarm.com/v2/${process.env.CRONALARM_KEY}/start`)
   .then(() => {
     actions = [];
 
+    //create an array of promises to upload each backup file to S3.
     allDatabases.forEach(db => {
       actions.push(
         new Promise(function(resolve, reject) {
@@ -92,7 +96,7 @@ rp(`http://api.cronalarm.com/v2/${process.env.CRONALARM_KEY}/start`)
               Bucket: process.env.S3_BUCKET,
               Key: backupDate + '/' + db + '.sql.gz',
               ServerSideEncryption: 'AES256',
-              StorageClass: 'STANDARD_IA'
+              StorageClass: 'STANDARD_IA' //STANDARD_ID = infrequent access = cheaper storage costs.
             }
           };
           var uploader = s3Client.uploadFile(params);
@@ -103,7 +107,7 @@ rp(`http://api.cronalarm.com/v2/${process.env.CRONALARM_KEY}/start`)
       );
     });
 
-     return Promise.all(actions);
+     return Promise.all(actions); //perform the uploads
   })
 	.then(() => {
     return rp(`http://api.cronalarm.com/v2/${process.env.CRONALARM_KEY}/end`);
