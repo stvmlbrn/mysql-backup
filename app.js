@@ -20,6 +20,8 @@ var s3Client = s3.createClient({
   }
 });
 var rp = require('request-promise');
+var os = require('os');
+var util = require('util');
 
 var moment = require('moment');
 var backupDate = moment().format('M-D-YY');
@@ -32,6 +34,14 @@ var ignore = [
   'information_schema',
   'book-images'
 ];
+
+//For sending results to CronAlarm
+var formData = {
+  success: 1,
+  server: os.hostname(),
+  path: __filename,
+  message: ''
+};
 
 connection.connect();
 
@@ -109,13 +119,15 @@ rp(`http://api.cronalarm.com/v2/${process.env.CRONALARM_KEY}/start`)
 
      return Promise.all(actions); //perform the uploads
   })
-	.then(() => {
-    return rp(`http://api.cronalarm.com/v2/${process.env.CRONALARM_KEY}/end`);
-  })
-  .then(() => process.exit())
   .catch(err => {
-    console.log(err);
-    process.exit();
-  });
-
-
+    formData.success = 0;
+    formData.message = util.inspect(err);
+  })
+  .finally(() => {
+    return rp({
+      method: 'POST',
+      uri: `http://api.cronalarm.com/v2/${process.env.CRONALARM_KEY}/end`,
+      form: formData
+    })
+  })
+  .then(() => process.exit());
