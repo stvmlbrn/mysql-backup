@@ -9,6 +9,7 @@
   "author": "Steve Milburn <scmilburn@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "app-root-path": "^2.0.1",
     "bluebird": "^3.4.0",
     "dotenv": "^2.0.0",
     "moment": "^2.13.0",

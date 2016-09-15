@@ -1,6 +1,7 @@
 'use strict';
 
-require('dotenv').config({path: '/home/acps/mysql-backup/.env'});
+var appRoot = require('app-root-path');
+require('dotenv').config({path: appRoot + '/.env'});
 
 var Promise = require('bluebird');
 var spawn = require('child_process').spawn;
