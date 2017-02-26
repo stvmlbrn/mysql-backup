@@ -1,5 +1,3 @@
-'use strict';
-
 var appRoot = require('app-root-path');
 require('dotenv').config({path: appRoot + '/.env'});
 
@@ -32,8 +30,7 @@ var actions = [];
 
 //Add any databases that do not need backed up in the 'ignore' array.
 var ignore = [
-  'information_schema',
-  'book-images'
+  'information_schema'
 ];
 
 //For sending results to CronAlarm
@@ -53,17 +50,17 @@ rp(`http://api.cronalarm.com/v2/${process.env.CRONALARM_KEY}/start`)
     return connection.queryAsync('show databases');
   })
 	.then(dbs => {
-    dbs.forEach(db => {
+    dbs.map(db => {
       if (ignore.indexOf(db.Database) === -1) {
         allDatabases.push(db.Database);
 
         //Create an array of promises that will spawn the mysqldump child process
         //and create the individual backup files.
-        actions.push(  
+        actions.push(
           new Promise(function(resolve, reject) {
-            let wstream = fs.createWriteStream(process.env.BACKUP_PATH + db.Database + '.sql');            
-            let mysqldump = spawn('mysqldump', [          
-              '-u', 
+            let wstream = fs.createWriteStream(process.env.BACKUP_PATH + db.Database + '.sql');
+            let mysqldump = spawn('mysqldump', [
+              '-u',
               process.env.DB_USER,
               '-p' + process.env.DB_PASS,
               db.Database
@@ -98,7 +95,7 @@ rp(`http://api.cronalarm.com/v2/${process.env.CRONALARM_KEY}/start`)
     actions = [];
 
     //create an array of promises to upload each backup file to S3.
-    allDatabases.forEach(db => {
+    allDatabases.map(db => {
       actions.push(
         new Promise(function(resolve, reject) {
           var params = {
@@ -107,7 +104,7 @@ rp(`http://api.cronalarm.com/v2/${process.env.CRONALARM_KEY}/start`)
               Bucket: process.env.S3_BUCKET,
               Key: backupDate + '/' + db + '.sql.gz',
               ServerSideEncryption: 'AES256',
-              StorageClass: 'STANDARD_IA' //STANDARD_ID = infrequent access = cheaper storage costs.
+              StorageClass: 'STANDARD_IA' //STANDARD_IA = infrequent access = cheaper storage costs.
             }
           };
           var uploader = s3Client.uploadFile(params);
