@@ -76,7 +76,7 @@ const formData = {
     allDatabases.map((db) => {
       actions.push(
         new Promise(function(resolve, reject) {
-          var params = {
+          let params = {
             localFile: `${process.env.BACKUP_PATH}${db}.sql.gz`,
             s3Params: {
               Bucket: process.env.S3_BUCKET,
@@ -85,7 +85,7 @@ const formData = {
               StorageClass: 'STANDARD_IA' //STANDARD_IA = infrequent access = cheaper storage costs.
             }
           };
-          var uploader = s3Client.uploadFile(params);
+          let uploader = s3Client.uploadFile(params);
 
           uploader.on('end', () => resolve());
           uploader.on('error', (err) => reject(err));
