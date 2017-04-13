@@ -6,8 +6,18 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "keywords": [
+    "MySQL",
+    "backup"
+  ],
+  "homepage": "https://github.com/stvmlbrn/mysql-backup",
+  "bugs": "https://github.com/stvmlbrn/mysql-backup/issues",
   "author": "Steve Milburn <scmilburn@gmail.com>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/stvmlbrn/mysql-backup"
+  },
   "dependencies": {
     "app-root-path": "^2.0.1",
     "bluebird": "^3.4.0",
