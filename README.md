@@ -9,6 +9,9 @@ so it needs to exist in the path local to where you are running this program.
 created the .env file and add the required variables.
 
 ## Required environment variables
+* DB_Host = Host name or IP address of the database server
+* DB_User = Username used to connect to the server
+* DB_Pass = Password used to connect to the server
 * S3_ACCESS_KEY = Your AWS access key
 * S3_SECRET_KEY = Your AWS secret key
 * S3_BUCKET = Name of the bucket you are uploading to
